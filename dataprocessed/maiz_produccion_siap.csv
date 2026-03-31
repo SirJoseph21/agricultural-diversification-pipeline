@@ -1,0 +1,65 @@
+﻿anio,cultivo,ciclo,modalidad,estado,sup_sembrada_ha,sup_cosechada_ha,sup_siniestrada_ha,valor_produccion_miles_mxn,eficiencia,perdida_ha,pct_perdida
+2026,Maíz,Cíclicos - Perennes,Riego + Temporal,Aguascalientes,10917.17,4035.0,0.0,66822.6,0.3696,6882.17,63.04
+2026,Maíz,Cíclicos - Perennes,Riego + Temporal,Baja California,83745.0,27307.16,0.0,554384.01,0.3261,56437.84,67.39
+2026,Maíz,Cíclicos - Perennes,Riego + Temporal,Baja California Sur,10551.03,3580.66,0.0,163844.72,0.3394,6970.37,66.06
+2026,Maíz,Cíclicos - Perennes,Riego + Temporal,Campeche,44186.51,2614.14,0.0,91705.03,0.0592,41572.37,94.08
+2026,Maíz,Cíclicos - Perennes,Riego + Temporal,Coahuila,28640.5,17341.0,0.0,308774.84,0.6055,11299.5,39.45
+2026,Maíz,Cíclicos - Perennes,Riego + Temporal,Colima,22970.15,4821.9,0.0,164814.34,0.2099,18148.25,79.01
+2026,Maíz,Cíclicos - Perennes,Riego + Temporal,Chiapas,447533.49,243838.9,0.0,1732023.77,0.5449,203694.59,45.51
+2026,Maíz,Cíclicos - Perennes,Riego + Temporal,Chihuahua,104152.52,82537.86,0.0,893906.27,0.7925,21614.66,20.75
+2026,Maíz,Cíclicos - Perennes,Riego + Temporal,Ciudad de México,179.4,7.4,0.0,647.17,0.0412,172.0,95.88
+2026,Maíz,Cíclicos - Perennes,Riego + Temporal,Durango,39643.21,27477.67,0.0,430319.94,0.6931,12165.54,30.69
+2026,Maíz,Cíclicos - Perennes,Riego + Temporal,Guanajuato,112150.19,44918.58,0.0,802422.38,0.4005,67231.61,59.95
+2026,Maíz,Cíclicos - Perennes,Riego + Temporal,Guerrero,68818.5,4059.39,0.0,30123.57,0.059,64759.11,94.1
+2026,Maíz,Cíclicos - Perennes,Riego + Temporal,Hidalgo,83183.13,43796.27,0.0,354968.69,0.5265,39386.86,47.35
+2026,Maíz,Cíclicos - Perennes,Riego + Temporal,Jalisco,117332.53,21975.82,0.0,912277.22,0.1873,95356.71,81.27
+2026,Maíz,Cíclicos - Perennes,Riego + Temporal,México,11970.66,5769.09,0.0,198347.08,0.4819,6201.57,51.81
+2026,Maíz,Cíclicos - Perennes,Riego + Temporal,Michoacán,68845.08,8855.08,19.41,929352.33,0.1286,59990.0,87.14
+2026,Maíz,Cíclicos - Perennes,Riego + Temporal,Morelos,29808.02,4283.24,0.0,363074.84,0.1437,25524.78,85.63
+2026,Maíz,Cíclicos - Perennes,Riego + Temporal,Nayarit,165900.49,1794.0,28.5,136749.63,0.0108,164106.49,98.92
+2026,Maíz,Cíclicos - Perennes,Riego + Temporal,Nuevo León,17429.36,2309.89,244.93,49198.05,0.1325,15119.47,86.75
+2026,Maíz,Cíclicos - Perennes,Riego + Temporal,Oaxaca,262615.41,80919.22,10.0,463664.77,0.3081,181696.19,69.19
+2026,Maíz,Cíclicos - Perennes,Riego + Temporal,Puebla,144856.07,83965.19,1.0,2040090.87,0.5796,60890.88,42.04
+2026,Maíz,Cíclicos - Perennes,Riego + Temporal,Querétaro,12824.2,6353.44,0.0,232001.92,0.4954,6470.76,50.46
+2026,Maíz,Cíclicos - Perennes,Riego + Temporal,Quintana Roo,46229.5,1664.95,700.0,80774.57,0.036,44564.55,96.4
+2026,Maíz,Cíclicos - Perennes,Riego + Temporal,San Luis Potosí,181722.4,21972.65,4119.0,530030.05,0.1209,159749.75,87.91
+2026,Maíz,Cíclicos - Perennes,Riego + Temporal,Sinaloa,521774.69,3951.28,3.0,1219609.04,0.0076,517823.41,99.24
+2026,Maíz,Cíclicos - Perennes,Riego + Temporal,Sonora,174394.9,22142.3,0.03,187157.75,0.127,152252.6,87.3
+2026,Maíz,Cíclicos - Perennes,Riego + Temporal,Tabasco,87700.66,36282.0,0.0,572930.23,0.4137,51418.66,58.63
+2026,Maíz,Cíclicos - Perennes,Riego + Temporal,Tamaulipas,141007.84,5730.63,87.0,307872.92,0.0406,135277.21,95.94
+2026,Maíz,Cíclicos - Perennes,Riego + Temporal,Tlaxcala,6325.34,1960.32,12.47,7105.33,0.3099,4365.02,69.01
+2026,Maíz,Cíclicos - Perennes,Riego + Temporal,Veracruz,662721.94,108508.64,3143.5,5011116.33,0.1637,554213.3,83.63
+2026,Maíz,Cíclicos - Perennes,Riego + Temporal,Yucatán,1161.2,0.0,0.0,0.0,0.0,1161.2,100.0
+2026,Maíz,Cíclicos - Perennes,Riego + Temporal,Zacatecas,31499.59,16607.2,0.0,305160.84,0.5272,14892.39,47.28
+2025,Maíz,Cíclicos - Perennes,Riego + Temporal,Aguascalientes,117695.79,117448.54,0.0,5157654.84,0.9979,247.25,0.21
+2025,Maíz,Cíclicos - Perennes,Riego + Temporal,Baja California,111516.12,106254.3,3964.5,15138709.71,0.9528,5261.82,4.72
+2025,Maíz,Cíclicos - Perennes,Riego + Temporal,Baja California Sur,33827.69,32833.39,88.2,6311009.69,0.9706,994.3,2.94
+2025,Maíz,Cíclicos - Perennes,Riego + Temporal,Campeche,289791.5,209265.1,0.0,4610341.43,0.7221,80526.4,27.79
+2025,Maíz,Cíclicos - Perennes,Riego + Temporal,Coahuila,134544.41,127387.93,2566.0,7526022.94,0.9468,7156.48,5.32
+2025,Maíz,Cíclicos - Perennes,Riego + Temporal,Colima,102996.98,102755.73,0.0,10836567.81,0.9977,241.25,0.23
+2025,Maíz,Cíclicos - Perennes,Riego + Temporal,Chiapas,1200742.41,981881.3,567.0,17521026.82,0.8177,218861.11,18.23
+2025,Maíz,Cíclicos - Perennes,Riego + Temporal,Chihuahua,886272.23,823947.8,13919.2,52059381.56,0.9297,62324.43,7.03
+2025,Maíz,Cíclicos - Perennes,Riego + Temporal,Ciudad de México,13487.91,11146.1,16.0,1398829.08,0.8264,2341.81,17.36
+2025,Maíz,Cíclicos - Perennes,Riego + Temporal,Durango,558556.89,321665.89,508.0,9639991.64,0.5759,236891.0,42.41
+2025,Maíz,Cíclicos - Perennes,Riego + Temporal,Guanajuato,835581.42,667200.23,12472.5,39093270.67,0.7985,168381.19,20.15
+2025,Maíz,Cíclicos - Perennes,Riego + Temporal,Guerrero,763291.69,661788.54,0.0,16994808.25,0.867,101503.15,13.3
+2025,Maíz,Cíclicos - Perennes,Riego + Temporal,Hidalgo,460778.18,407433.43,18589.1,10255721.65,0.8842,53344.75,11.58
+2025,Maíz,Cíclicos - Perennes,Riego + Temporal,Jalisco,1112640.98,785319.01,623.0,56798760.89,0.7058,327321.97,29.42
+2025,Maíz,Cíclicos - Perennes,Riego + Temporal,México,683335.82,549748.98,757.0,24749386.82,0.8045,133586.84,19.55
+2025,Maíz,Cíclicos - Perennes,Riego + Temporal,Michoacán,1002417.86,915448.56,6106.2,99183475.37,0.9132,86969.3,8.68
+2025,Maíz,Cíclicos - Perennes,Riego + Temporal,Morelos,109464.58,84888.9,8.0,8928095.27,0.7755,24575.68,22.45
+2025,Maíz,Cíclicos - Perennes,Riego + Temporal,Nayarit,311515.32,245652.7,42.0,11176992.1,0.7886,65862.62,21.14
+2025,Maíz,Cíclicos - Perennes,Riego + Temporal,Nuevo León,92641.4,86341.49,515.0,3917408.93,0.932,6299.91,6.8
+2025,Maíz,Cíclicos - Perennes,Riego + Temporal,Oaxaca,837217.47,742030.15,174.9,19146837.64,0.8863,95187.32,11.37
+2025,Maíz,Cíclicos - Perennes,Riego + Temporal,Puebla,845309.01,780314.6,500.0,25447087.88,0.9231,64994.41,7.69
+2025,Maíz,Cíclicos - Perennes,Riego + Temporal,Querétaro,115058.01,90305.3,7026.6,5193231.08,0.7849,24752.71,21.51
+2025,Maíz,Cíclicos - Perennes,Riego + Temporal,Quintana Roo,105870.5,95608.3,50.0,2850282.85,0.9031,10262.2,9.69
+2025,Maíz,Cíclicos - Perennes,Riego + Temporal,San Luis Potosí,630551.15,557560.79,42177.9,22551281.34,0.8842,72990.36,11.58
+2025,Maíz,Cíclicos - Perennes,Riego + Temporal,Sinaloa,654206.34,641991.49,3.0,44663322.08,0.9813,12214.85,1.87
+2025,Maíz,Cíclicos - Perennes,Riego + Temporal,Sonora,256539.6,241899.44,610.3,41430700.01,0.9429,14640.16,5.71
+2025,Maíz,Cíclicos - Perennes,Riego + Temporal,Tabasco,215701.74,213583.24,0.0,8906349.28,0.9902,2118.5,0.98
+2025,Maíz,Cíclicos - Perennes,Riego + Temporal,Tamaulipas,1089895.56,1029174.98,22332.0,19604402.61,0.9443,60720.58,5.57
+2025,Maíz,Cíclicos - Perennes,Riego + Temporal,Tlaxcala,227381.25,186625.22,4811.78,3926602.0,0.8208,40756.03,17.92
+2025,Maíz,Cíclicos - Perennes,Riego + Temporal,Veracruz,1465056.72,1297716.09,18947.05,63691562.57,0.8858,167340.63,11.42
+2025,Maíz,Cíclicos - Perennes,Riego + Temporal,Yucatán,150269.93,66245.73,0.0,3394167.27,0.4408,84024.2,55.92
+2025,Maíz,Cíclicos - Perennes,Riego + Temporal,Zacatecas,1171387.01,1046191.2,202.0,25985750.97,0.8931,125195.81,10.69
