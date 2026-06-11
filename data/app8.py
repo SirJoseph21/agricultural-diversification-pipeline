@@ -50,8 +50,8 @@ st.markdown("""
 
     .kpi-row {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 8px;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 12px;
         margin-bottom: 14px;
     }
     .kpi-card {
@@ -74,7 +74,6 @@ st.markdown("""
         line-height: 1.1;
     }
     .kpi-value.accent { color: #00E676; }
-    .kpi-value.warn   { color: #EF5350; }
     .kpi-sub { font-size: 10px; color: #90A4AE; margin-top: 2px; }
 
     .rec-banner {
