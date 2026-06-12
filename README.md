@@ -1,4 +1,4 @@
-# Análisis de Producción Agrícola + Clima México 🌽🌡️
+# Análisis de Producción Agrícola + Clima México 
 
 Proyecto de ciencia de datos para identificar cultivos con potencial de diversificación en México, cruzando datos de producción agrícola del SIAP con datos climáticos de CONAGUA 2025.
 
