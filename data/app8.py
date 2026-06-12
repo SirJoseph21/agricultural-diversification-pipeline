@@ -9,23 +9,16 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 from reportlab.lib.units import inch
 
-# Configuración de entorno
 st.set_page_config(
-    page_title="Agrovita · Inteligencia Agrícola",
+    page_title="Diversificación Agrícola · México",
     page_icon="🌱",
     layout="wide"
 )
 
-# Estilos CSS Profesionales y Layout Responsivo
 st.markdown("""
 <style>
     .stApp { background-color: #0D1B2A; color: #E0E0E0; }
     [data-testid="stSidebar"] { display: none; }
-
-    /* Ajuste para evitar encimamiento en pantallas pequeñas (720p/Móvil) */
-    [data-testid="column"] {
-        min-width: 320px !important;
-    }
 
     .dash-header {
         display: flex;
@@ -42,7 +35,17 @@ st.markdown("""
         letter-spacing: 0.08em;
         text-transform: uppercase;
     }
-    
+    .dash-subtitle { font-size: 12px; color: #90A4AE; }
+
+    .filter-label {
+        font-size: 11px;
+        color: #B0BEC5;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        white-space: nowrap;
+        margin-bottom: 4px;
+    }
+
     .kpi-row {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -60,14 +63,17 @@ st.markdown("""
         font-size: 10px;
         color: #546E7A;
         text-transform: uppercase;
+        letter-spacing: 0.06em;
         margin-bottom: 4px;
     }
     .kpi-value {
         font-size: 20px;
         font-weight: 700;
         color: #E0E0E0;
+        line-height: 1.1;
     }
     .kpi-value.accent { color: #00E676; }
+    .kpi-sub { font-size: 10px; color: #90A4AE; margin-top: 2px; }
 
     .rec-banner {
         background: #0A2A1A;
@@ -78,7 +84,7 @@ st.markdown("""
         font-size: 14px;
         color: #B0BEC5;
     }
-    .rec-banner strong { color: #00E676; }
+    .rec-banner strong { color: #00E676; font-size: 16px; }
 
     .section-label {
         font-size: 10px;
@@ -90,14 +96,40 @@ st.markdown("""
         padding-bottom: 4px;
     }
 
-    .stTabs [data-baseweb="tab-list"] { background: #112233; }
-    .stTabs [aria-selected="true"] { color: #00E676 !important; border-bottom-color: #00E676 !important; }
+    .stTabs [data-baseweb="tab-list"] {
+        background: #112233;
+        border-bottom: 1px solid #1E3A5F;
+        gap: 0;
+    }
+    .stTabs [data-baseweb="tab"] {
+        font-size: 11px;
+        color: #546E7A;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        padding: 8px 16px;
+        border-radius: 0;
+    }
+    .stTabs [aria-selected="true"] {
+        color: #00E676 !important;
+        border-bottom: 2px solid #00E676 !important;
+        background: transparent !important;
+    }
 
-    #MainMenu, footer, header { visibility: hidden; }
+    .dash-footer {
+        font-size: 10px;
+        color: #546E7A;
+        border-top: 1px solid #1E3A5F;
+        padding-top: 8px;
+        margin-top: 16px;
+    }
+
+    #MainMenu { visibility: hidden; }
+    footer    { visibility: hidden; }
+    header    { visibility: hidden; }
+    .block-container { padding-top: 1rem; padding-bottom: 1rem; }
 </style>
 """, unsafe_allow_html=True)
 
-# Dataset de referencia técnica y financiera
 datos_financieros = {
     "Tomate rojo (jitomate)": {"precio_ton": 10062.31, "costo_ha": 120000, "rendimiento": 74.79},
     "Fresa":                  {"precio_ton": 24706.56, "costo_ha": 85000,  "rendimiento": 43.90},
@@ -127,175 +159,397 @@ compatibilidad = {
     "Seco / Templado":        ["Nopalitos", "Sandía", "Cebolla", "Papa"],
 }
 
-PLOT_CONFIG = dict(
+PLOT_LAYOUT = dict(
     paper_bgcolor="#0D1B2A",
     plot_bgcolor="#112233",
     font_color="#B0BEC5",
-    margin=dict(t=40, b=30, l=10, r=10)
+    font_size=11,
+    margin=dict(t=36, b=28, l=8, r=8),
+    legend=dict(bgcolor="#0D1B2A", bordercolor="#1E3A5F", borderwidth=1, font_size=10),
 )
 
 @st.cache_data
-def load_data_engine():
-    df_agro = pd.read_csv("data/processed/cultivos_2025.csv")
-    df_clima = pd.read_csv("data/processed/clima_estados_2025.csv")
-    df_agro = df_agro[df_agro["es_flor"] == False].copy()
+def cargar_datos():
+    df_cultivos = pd.read_csv("data/processed/cultivos_2025.csv")
+    df_clima    = pd.read_csv("data/processed/clima_estados_2025.csv")
+    df_agro     = df_cultivos[df_cultivos["es_flor"] == False].copy()
 
-    def get_climate_profile(row):
-        h = "Húmedo" if row["precipitacion_anual_mm"] >= 1000 else "Semi-húmedo" if row["precipitacion_anual_mm"] >= 500 else "Seco"
-        t = "Cálido" if row["temp_media_anual_c"] >= 24 else "Templado" if row["temp_media_anual_c"] >= 18 else "Frío"
-        return f"{h} / {t}"
+    def clasificar_clima(row):
+        humedad = "Húmedo" if row["precipitacion_anual_mm"] >= 1000 else \
+                  "Semi-húmedo" if row["precipitacion_anual_mm"] >= 500 else "Seco"
+        temp    = "Cálido" if row["temp_media_anual_c"] >= 24 else \
+                  "Templado" if row["temp_media_anual_c"] >= 18 else "Frío"
+        return f"{humedad} / {temp}"
 
-    df_clima["perfil"] = df_clima.apply(get_climate_profile, axis=1)
-    
-    m_rend = df_agro["rendimiento"].mean()
-    m_risk = df_agro["tasa_siniestro_pct"].mean()
-    
-    def get_quadrant(row):
-        if row["rendimiento"] > m_rend:
-            return "Alta Producción / Bajo Riesgo" if row["tasa_siniestro_pct"] <= m_risk else "Alta Producción / Alto Riesgo"
-        return "Baja Producción / Bajo Riesgo" if row["tasa_siniestro_pct"] <= m_risk else "Baja Producción / Alto Riesgo"
+    df_clima["perfil_climatico"] = df_clima.apply(clasificar_clima, axis=1)
 
-    df_agro["cuadrante"] = df_agro.apply(get_quadrant, axis=1)
+    prom_rend      = df_agro["rendimiento"].mean()
+    prom_siniestro = df_agro["tasa_siniestro_pct"].mean()
+
+    def clasificar_cuadrante(row):
+        alto_rend   = row["rendimiento"] > prom_rend
+        bajo_riesgo = row["tasa_siniestro_pct"] <= prom_siniestro
+        if   alto_rend and     bajo_riesgo: return "Alta producción / Bajo riesgo"
+        elif alto_rend and not bajo_riesgo: return "Alta producción / Alto riesgo"
+        elif not alto_rend and bajo_riesgo: return "Baja producción / Bajo riesgo"
+        else:                               return "Baja producción / Alto riesgo"
+
+    df_agro["cuadrante"] = df_agro.apply(clasificar_cuadrante, axis=1)
     return df_agro, df_clima
 
-df_agro, df_clima = load_data_engine()
+df_agro, df_clima = cargar_datos()
 
-# --- Interfaz Principal ---
 st.markdown("""
 <div class="dash-header">
-    <div class="dash-title">Agrovita: Inteligencia para Diversificación de Cultivos</div>
-    <div style="font-size:11px; color:#546E7A">URNC · EQUIPO 4 · 2026</div>
+  <div>
+    <div class="dash-title">¿Qué puedo sembrar en mi estado?</div>
+    <div class="dash-subtitle">Cultivos alternativos al maíz con mayor ganancia · SIAP / CONAGUA / SIACON 2024-2026</div>
+  </div>
+  <div class="dash-subtitle">Universidad Rosario Castellanos — LCDN · Equipo 4 · 2026</div>
 </div>
 """, unsafe_allow_html=True)
 
-col_f1, _ = st.columns([1.2, 3])
+col_f1, col_f2 = st.columns([1, 4])
 with col_f1:
-    estado_sel = st.selectbox("Entidad Federativa", sorted(df_clima["estado"].tolist()))
+    st.markdown('<div class="filter-label">Selecciona tu estado</div>', unsafe_allow_html=True)
+    estado_sel = st.selectbox(
+        "", sorted(df_clima["estado"].tolist()), label_visibility="collapsed"
+    )
 
-# Lógica de Negocio: Cálculo de Rentabilidad
-estado_info = df_clima[df_clima["estado"] == estado_sel].iloc[0]
-perfil = estado_info["perfil"]
-cultivos_viables = [c for c in compatibilidad.get(perfil, []) if c in datos_financieros]
+estado_data  = df_clima[df_clima["estado"] == estado_sel].iloc[0]
+perfil       = estado_data["perfil_climatico"]
+cultivos_rec = compatibilidad.get(perfil, [])
+maiz_rend    = df_agro[df_agro["cultivo"] == "Maíz grano"]["rendimiento"].values[0]
+maiz_margen  = (datos_financieros["Maíz grano"]["precio_ton"] *
+                datos_financieros["Maíz grano"]["rendimiento"] -
+                datos_financieros["Maíz grano"]["costo_ha"])
 
-maiz_data = datos_financieros["Maíz grano"]
-maiz_margin = (maiz_data["precio_ton"] * maiz_data["rendimiento"]) - maiz_data["costo_ha"]
-
-if cultivos_viables:
-    mejor_opcion = max(cultivos_viables, key=lambda x: (datos_financieros[x]["precio_ton"] * datos_financieros[x]["rendimiento"]) - datos_financieros[x]["costo_ha"])
-    fin_opcion = datos_financieros[mejor_opcion]
-    utilidad = (fin_opcion["precio_ton"] * fin_opcion["rendimiento"]) - fin_opcion["costo_ha"]
-    vol_vs_maiz = fin_opcion["rendimiento"] / maiz_data["rendimiento"]
+cultivos_con_margen = [c for c in cultivos_rec if c in datos_financieros]
+if cultivos_con_margen:
+    mejor_cultivo = max(
+        cultivos_con_margen,
+        key=lambda x: datos_financieros[x]["precio_ton"] * datos_financieros[x]["rendimiento"] - datos_financieros[x]["costo_ha"]
+    )
+    mejor_rend   = df_agro[df_agro["cultivo"] == mejor_cultivo]["rendimiento"].values[0]
+    mejor_margen = (datos_financieros[mejor_cultivo]["precio_ton"] *
+                    datos_financieros[mejor_cultivo]["rendimiento"] -
+                    datos_financieros[mejor_cultivo]["costo_ha"])
+    veces_maiz   = mejor_rend / maiz_rend
 else:
-    mejor_opcion, utilidad, vol_vs_maiz = "Maíz grano", maiz_margin, 1.0
+    mejor_cultivo = "N/D"
+    mejor_rend = mejor_margen = veces_maiz = 0
 
-# KPIs Dinámicos
 st.markdown(f"""
 <div class="kpi-row">
-    <div class="kpi-card"><div class="kpi-label">Perfil Climático</div><div class="kpi-value">{perfil}</div></div>
-    <div class="kpi-card"><div class="kpi-label">Recomendación Primaria</div><div class="kpi-value accent">{mejor_opcion}</div></div>
-    <div class="kpi-card"><div class="kpi-label">Ganancia Neta / Ha</div><div class="kpi-value accent">${utilidad:,.0f} MXN</div></div>
-    <div class="kpi-card"><div class="kpi-label">Volumen vs Maíz</div><div class="kpi-value accent">{vol_vs_maiz:.1f}x Ton</div></div>
-</div>
-<div class="rec-banner">
-    Análisis Estratégico: En <strong>{estado_sel}</strong>, la transición a <strong>{mejor_opcion}</strong> incrementa la utilidad proyectada a <strong>${utilidad:,.0f} MXN</strong> por ciclo hectárea.
+  <div class="kpi-card">
+    <div class="kpi-label">Tipo de clima</div>
+    <div class="kpi-value" style="font-size:14px">{perfil}</div>
+    <div class="kpi-sub">{estado_sel}</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Mejor cultivo para sembrar</div>
+    <div class="kpi-value accent" style="font-size:16px">{mejor_cultivo}</div>
+    <div class="kpi-sub">recomendado para tu clima</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Ganancia estimada por hectárea</div>
+    <div class="kpi-value accent">${mejor_margen:,.0f}</div>
+    <div class="kpi-sub">pesos mexicanos</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Volumen vs Maíz</div>
+    <div class="kpi-value accent">{veces_maiz:.1f}x</div>
+    <div class="kpi-sub">toneladas por hectárea</div>
+  </div>
 </div>
 """, unsafe_allow_html=True)
 
-# --- Contenedor Lateral (Ajuste de ratio para pantallas 768p) ---
-col_left, col_right = st.columns([1.3, 2])
+st.markdown(f"""
+<div class="rec-banner">
+  Para <strong>{estado_sel}</strong> recomendamos cambiar a <strong>{mejor_cultivo}</strong> —
+  puedes ganar <strong>${mejor_margen:,.0f} pesos libres por hectárea</strong>,
+  produciendo un volumen <strong>{veces_maiz:.1f} veces mayor</strong> en toneladas comparado al maíz.
+</div>
+""", unsafe_allow_html=True)
 
-with col_left:
-    st.markdown('<div class="section-label">Ranking de Rentabilidad</div>', unsafe_allow_html=True)
-    if cultivos_viables:
-        df_rank = pd.DataFrame([
-            {"Cultivo": c, 
-             "Ganancia/Ha": (datos_financieros[c]["precio_ton"] * datos_financieros[c]["rendimiento"]) - datos_financieros[c]["costo_ha"],
-             "vs Maíz": f"{(datos_financieros[c]['rendimiento'] / maiz_data['rendimiento']):.1f}x"} 
-            for c in cultivos_viables
-        ]).sort_values("Ganancia/Ha", ascending=False).reset_index(drop=True)
-        
-        df_rank.insert(0, "Rank", range(1, len(df_rank)+1))
-        df_rank["Rank"] = df_rank["Rank"].apply(lambda x: f"#{x}")
-        df_rank["Ganancia/Ha"] = df_rank["Ganancia/Ha"].apply(lambda x: f"${x:,.0f}")
-        
-        st.dataframe(df_rank, use_container_width=True, hide_index=True, height=250)
+col_tabla, col_graficas = st.columns([1, 2.5])
+df_rec = pd.DataFrame() 
 
-    st.markdown('<div class="section-label">Variables Climáticas (CONAGUA)</div>', unsafe_allow_html=True)
-    df_env = pd.DataFrame({
-        "Variable": ["Precipitación Anual", "Temp. Media", "Máxima Abs."],
-        "Valor": [f"{estado_info['precipitacion_anual_mm']:.0f} mm", f"{estado_info['temp_media_anual_c']:.1f} °C", f"{estado_info['temp_maxima_anual_c']:.1f} °C"]
+with col_tabla:
+    st.markdown('<div class="section-label">Cultivos recomendados</div>', unsafe_allow_html=True)
+
+    if cultivos_rec:
+        df_rec = df_agro[df_agro["cultivo"].isin(cultivos_rec)][["cultivo", "rendimiento"]].copy()
+        
+        df_rec["costo_ha"] = df_rec["cultivo"].apply(
+            lambda x: datos_financieros[x]["costo_ha"] if x in datos_financieros else None
+        )
+        df_rec["ganancia_ha"] = df_rec["cultivo"].apply(
+            lambda x: (datos_financieros[x]["precio_ton"] * datos_financieros[x]["rendimiento"]) - datos_financieros[x]["costo_ha"]
+            if x in datos_financieros else None
+        )
+        
+        df_rec["vs_maiz"] = (df_rec["rendimiento"] / maiz_rend).round(1).astype(str) + "x"
+        df_rec = df_rec.dropna(subset=["ganancia_ha"])
+        
+        if not df_rec.empty:
+            df_rec = df_rec.sort_values("ganancia_ha", ascending=False).reset_index(drop=True)
+            df_rec["costo_ha"] = df_rec["costo_ha"].apply(lambda x: f"${x:,.0f}" if pd.notna(x) else "N/D")
+            df_rec["ganancia_ha"] = df_rec["ganancia_ha"].apply(lambda x: f"${x:,.0f}" if pd.notna(x) else "N/D")
+            
+            df_rec.insert(0, "Top", range(1, len(df_rec) + 1))
+            df_rec["Top"] = df_rec["Top"].apply(lambda x: f"#{x}")
+            df_rec.columns = ["Top", "Cultivo", "Producción (t/ha)", "Inversión/ha", "Ganancia/ha", "Vol. vs Maíz"]
+            
+            st.dataframe(df_rec, use_container_width=True, height=230, hide_index=True)
+        else:
+            st.warning("No hay datos financieros registrados para este perfil climático.")
+    else:
+        st.warning("No hay datos financieros registrados para este perfil climático.")
+
+    st.markdown('<div class="section-label" style="margin-top:12px">Clima de tu estado</div>', unsafe_allow_html=True)
+    df_clima_tabla = pd.DataFrame({
+        "Indicador": ["Lluvia anual", "Temp. media", "Temp. máxima", "Temp. mínima"],
+        "Tu estado": [
+            f"{estado_data['precipitacion_anual_mm']:.0f} mm",
+            f"{estado_data['temp_media_anual_c']:.1f} °C",
+            f"{estado_data['temp_maxima_anual_c']:.1f} °C",
+            f"{estado_data['temp_minima_anual_c']:.1f} °C",
+        ],
+        "Promedio nacional": [
+            f"{df_clima['precipitacion_anual_mm'].mean():.0f} mm",
+            f"{df_clima['temp_media_anual_c'].mean():.1f} °C",
+            f"{df_clima['temp_maxima_anual_c'].mean():.1f} °C",
+            f"{df_clima['temp_minima_anual_c'].mean():.1f} °C",
+        ]
     })
-    st.table(df_env)
+    st.dataframe(df_clima_tabla, use_container_width=True, height=180, hide_index=True)
 
-with col_right:
-    t1, t2, t3 = st.tabs(["Rendimiento", "Finanzas", "Riesgo"])
-    
-    with t1:
-        c_list = cultivos_viables + ["Maíz grano"]
-        df_v1 = df_agro[df_agro["cultivo"].isin(c_list)].sort_values("rendimiento")
-        fig1 = px.bar(df_v1, x="rendimiento", y="cultivo", orientation='h', template="plotly_dark",
-                     color_discrete_sequence=["#1976D2"])
-        fig1.update_layout(**PLOT_CONFIG)
+with col_graficas:
+    tab1, tab2, tab3 = st.tabs([
+        "🌾 ¿Cuánto produce?",
+        "💰 ¿Cuánto gana?",
+        "⚠️ ¿Qué tan seguro es?"
+    ])
+
+    with tab1:
+        st.caption("La barra roja es el maíz — todo lo que la supera produce más toneladas por hectárea.")
+        cultivos_graf = cultivos_rec + ["Maíz grano"]
+        df_bar = df_agro[df_agro["cultivo"].isin(cultivos_graf)].sort_values("rendimiento", ascending=True).copy()
+        df_bar["color"] = df_bar["cultivo"].apply(
+            lambda x: "Maíz (referencia)" if x == "Maíz grano" else "Cultivo recomendado"
+        )
+        fig1 = px.bar(
+            df_bar, x="rendimiento", y="cultivo", color="color",
+            color_discrete_map={"Maíz (referencia)": "#EF5350", "Cultivo recomendado": "#42A5F5"},
+            labels={"rendimiento": "Producción (toneladas por hectárea)", "cultivo": ""},
+            orientation="h", template="plotly_dark"
+        )
+        fig1.update_layout(**PLOT_LAYOUT, legend_title="")
         st.plotly_chart(fig1, use_container_width=True)
 
-    with t2:
-        df_v2 = pd.DataFrame([{"c": c, "util": (datos_financieros[c]["precio_ton"] * datos_financieros[c]["rendimiento"]) - datos_financieros[c]["costo_ha"]} for c in cultivos_viables])
-        fig2 = px.bar(df_v2, x="util", y="c", template="plotly_dark", color_discrete_sequence=["#00E676"])
-        fig2.add_vline(x=maiz_margin, line_dash="dash", line_color="#EF5350")
-        fig2.update_layout(**PLOT_CONFIG)
+    with tab2:
+        st.caption("Los cultivos a la derecha de la línea roja dejan más ganancia que el maíz.")
+        cultivos_fin = [c for c in cultivos_rec if c in datos_financieros]
+        df_fin_graf = pd.DataFrame([
+            {"cultivo": c,
+             "ganancia": datos_financieros[c]["precio_ton"] * datos_financieros[c]["rendimiento"] - datos_financieros[c]["costo_ha"]}
+            for c in cultivos_fin
+        ]).sort_values("ganancia", ascending=True)
+
+        fig2 = px.bar(
+            df_fin_graf, x="ganancia", y="cultivo",
+            color_discrete_sequence=["#42A5F5"],
+            labels={"ganancia": "Ganancia por hectárea (pesos)", "cultivo": ""},
+            orientation="h", template="plotly_dark"
+        )
+        fig2.add_vline(x=maiz_margen, line_dash="dash", line_color="#EF5350", line_width=2,
+                       annotation_text=f"Maíz: ${maiz_margen:,.0f}/ha",
+                       annotation_position="top right", annotation_font_color="#EF5350")
+        fig2.update_layout(**PLOT_LAYOUT, legend_title="")
+        fig2.update_xaxes(tickformat="$,.0f")
         st.plotly_chart(fig2, use_container_width=True)
 
-    with t3:
-        fig3 = px.scatter(df_agro, x="tasa_siniestro_pct", y="rendimiento", color="cuadrante",
-                         hover_name="cultivo", template="plotly_dark")
-        fig3.update_layout(**PLOT_CONFIG)
+    with tab3:
+        st.caption("Lo ideal está arriba a la izquierda: produce mucho y tiene bajo riesgo de perder la cosecha. Pasa el cursor sobre ⭐ para ver los cultivos recomendados.")
+        colores_map = {
+            "Alta producción / Bajo riesgo": "#42A5F5",
+            "Alta producción / Alto riesgo": "#EF5350",
+            "Baja producción / Bajo riesgo": "#546E7A",
+            "Baja producción / Alto riesgo": "#FFA726"
+        }
+        fig3 = px.scatter(
+            df_agro, x="tasa_siniestro_pct", y="rendimiento",
+            color="cuadrante", hover_name="cultivo",
+            color_discrete_map=colores_map,
+            labels={
+                "tasa_siniestro_pct": "Riesgo de perder la cosecha (%)",
+                "rendimiento": "Producción (toneladas por hectárea)",
+                "cuadrante": ""
+            },
+            template="plotly_dark"
+        )
+        prom_s = df_agro["tasa_siniestro_pct"].mean()
+        prom_r = df_agro["rendimiento"].mean()
+        fig3.add_vline(x=prom_s, line_dash="dot", line_color="#546E7A", line_width=1,
+                       annotation_text=f"{prom_s:.1f}%", annotation_font_color="#546E7A", annotation_font_size=9)
+        fig3.add_hline(y=prom_r, line_dash="dot", line_color="#546E7A", line_width=1,
+                       annotation_text=f"{prom_r:.1f} t/ha", annotation_font_color="#546E7A", annotation_font_size=9)
+        df_highlight = df_agro[df_agro["cultivo"].isin(cultivos_rec)]
+        fig3.add_scatter(
+            x=df_highlight["tasa_siniestro_pct"], y=df_highlight["rendimiento"],
+            mode="markers",
+            marker=dict(size=13, color="#00E676", symbol="star"),
+            customdata=df_highlight[["cultivo"]],
+            hovertemplate="<b>%{customdata[0]}</b><br>Riesgo: %{x:.1f}%<br>Producción: %{y:.1f} t/ha<extra></extra>",
+            name="Recomendados"
+        )
+        fig3.update_layout(**PLOT_LAYOUT)
         st.plotly_chart(fig3, use_container_width=True)
 
-# --- Generador de PDF (Tema McKinsey / Azul Corporativo) ---
-def generate_corporate_pdf(estado, perfil, mejor, util, vol, df_rank):
-    buf = io.BytesIO()
-    doc = SimpleDocTemplate(buf, pagesize=letter, leftMargin=0.7*inch, rightMargin=0.7*inch, topMargin=0.7*inch)
+def generar_reporte_pdf(estado, perfil, mejor_cultivo, mejor_margen, veces_maiz, maiz_margen, df_rec):
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter,
+                            leftMargin=0.8*inch, rightMargin=0.8*inch,
+                            topMargin=0.8*inch, bottomMargin=0.8*inch)
     styles = getSampleStyleSheet()
-    
-    c_navy = colors.HexColor("#0A2540")
-    c_blue = colors.HexColor("#1976D2")
-    
-    s_title = ParagraphStyle("T", parent=styles["Title"], fontSize=20, textColor=c_navy, spaceAfter=10)
-    s_body = ParagraphStyle("B", parent=styles["Normal"], fontSize=11, leading=14)
-    s_sec = ParagraphStyle("S", parent=styles["Heading2"], fontSize=13, textColor=c_blue, spaceBefore=15)
 
-    elements = [
-        Paragraph("Reporte de Inteligencia Agrícola", s_title),
-        Paragraph(f"Análisis Técnico-Financiero · {estado} · 2026", styles["Normal"]),
-        Spacer(1, 15),
-        Paragraph("Resumen Ejecutivo", s_sec),
-        Paragraph(f"Bajo un perfil climático <b>{perfil}</b>, se identifica a <b>{mejor}</b> como el activo biológico de mayor viabilidad. "
-                  f"La proyección de utilidad neta se estima en <b>${util:,.0f} MXN/Ha</b>, con una eficiencia productiva <b>{vol:.1f} veces superior</b> al maíz.", s_body),
-        Spacer(1, 15),
-        Paragraph("Comparativa de Rentabilidad", s_sec)
-    ]
+    color_primario = colors.HexColor("#0A2540")   
+    color_secundario = colors.HexColor("#1976D2") 
+    color_gris = colors.HexColor("#546E7A")       
+    color_fondo_fila = colors.HexColor("#F0F4F8") 
+    color_borde = colors.HexColor("#CFD8DC")      
 
-    if not df_rank.empty:
-        data = [df_rank.columns.tolist()] + df_rank.values.tolist()
-        t = Table(data, colWidths=[0.6*inch, 2.2*inch, 1.5*inch, 1.2*inch])
-        t.setStyle(TableStyle([
-            ('BACKGROUND', (0,0), (-1,0), c_navy),
-            ('TEXTCOLOR', (0,0), (-1,0), colors.white),
-            ('ALIGN', (0,0), (-1,-1), 'CENTER'),
-            ('GRID', (0,0), (-1,-1), 0.5, colors.grey),
-            ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.whitesmoke, colors.white])
+    estilo_titulo = ParagraphStyle("titulo", parent=styles["Title"],
+                                   fontSize=18, textColor=color_primario,
+                                   spaceAfter=4)
+    estilo_subtitulo = ParagraphStyle("subtitulo", parent=styles["Normal"],
+                                      fontSize=10, textColor=color_gris,
+                                      spaceAfter=16)
+    estilo_seccion = ParagraphStyle("seccion", parent=styles["Heading2"],
+                                    fontSize=12, textColor=color_secundario,
+                                    spaceBefore=14, spaceAfter=6,
+                                    borderPad=4)
+    estilo_cuerpo = ParagraphStyle("cuerpo", parent=styles["Normal"],
+                                   fontSize=11, leading=16, spaceAfter=6)
+    estilo_destacado = ParagraphStyle("destacado", parent=styles["Normal"],
+                                      fontSize=13, textColor=color_primario,
+                                      fontName="Helvetica-Bold", spaceAfter=8)
+    estilo_nota = ParagraphStyle("nota", parent=styles["Normal"],
+                                 fontSize=8, textColor=colors.HexColor("#888888"),
+                                 spaceBefore=24)
+
+    historia = []
+
+    historia.append(Paragraph("Reporte de Inteligencia Agrícola", estilo_titulo))
+    historia.append(Paragraph(f"Análisis de Diversificación · {estado} · 2026", estilo_subtitulo))
+
+    historia.append(Table([[""]], colWidths=[6.4*inch],
+                           style=[("LINEBELOW", (0,0), (-1,-1), 1.5, color_secundario)]))
+    historia.append(Spacer(1, 12))
+
+    historia.append(Paragraph("Resumen Ejecutivo para el Productor", estilo_seccion))
+    historia.append(Paragraph(
+        f"La entidad federativa de <b>{estado}</b> presenta un perfil climatológico <b>{perfil}</b>. "
+        f"De acuerdo con nuestro modelo financiero, el cultivo más rentable es:",
+        estilo_cuerpo
+    ))
+    historia.append(Paragraph(f"→ {mejor_cultivo}", estilo_destacado))
+    historia.append(Paragraph(
+        f"La transición hacia <b>{mejor_cultivo}</b> proyecta una utilidad de "
+        f"<b>${mejor_margen:,.0f} MXN libres por hectárea</b>. Esto representa "
+        f"un volumen de producción <b>{veces_maiz:.1f} veces mayor</b> en contraste con el maíz tradicional "
+        f"(${maiz_margen:,.0f}/ha).",
+        estilo_cuerpo
+    ))
+
+    historia.append(Spacer(1, 10))
+
+    historia.append(Paragraph("Ranking de Rentabilidad y Capital", estilo_seccion))
+    
+    if not df_rec.empty:
+        historia.append(Paragraph(
+            "Alternativas agrícolas viables para la región, ordenadas por margen de ganancia:",
+            estilo_cuerpo
+        ))
+        historia.append(Spacer(1, 6))
+
+        tabla_datos = [["Top", "Cultivo", "Prod. (t/ha)", "Inv./ha", "Ganancia/ha", "vs Maíz"]]
+        for _, row in df_rec.iterrows():
+            tabla_datos.append([
+                row["Top"],
+                row["Cultivo"],
+                str(row["Producción (t/ha)"]),
+                row["Inversión/ha"],
+                row["Ganancia/ha"],
+                row["Vol. vs Maíz"]
+            ])
+
+        tabla = Table(tabla_datos, colWidths=[0.5*inch, 1.8*inch, 1.1*inch, 1.2*inch, 1.3*inch, 1.0*inch])
+        tabla.setStyle(TableStyle([
+            ("BACKGROUND",  (0, 0), (-1, 0),  color_primario),
+            ("TEXTCOLOR",   (0, 0), (-1, 0),  colors.white),
+            ("FONTNAME",    (0, 0), (-1, 0),  "Helvetica-Bold"),
+            ("FONTSIZE",    (0, 0), (-1, 0),  10),
+            ("FONTSIZE",    (0, 1), (-1, -1), 10),
+            ("ROWBACKGROUNDS", (0, 1), (-1, -1), [color_fondo_fila, colors.white]),
+            ("GRID",        (0, 0), (-1, -1), 0.5, color_borde),
+            ("ALIGN",       (2, 0), (-1, -1), "CENTER"), 
+            ("VALIGN",      (0, 0), (-1, -1), "MIDDLE"),
+            ("ROWHEIGHT",   (0, 0), (-1, -1), 22),
+            ("TOPPADDING",  (0, 0), (-1, -1), 5),
+            ("BOTTOMPADDING",(0, 0), (-1, -1), 5),
         ]))
-        elements.append(t)
+        historia.append(tabla)
+    else:
+        historia.append(Paragraph(
+            "Actualmente no hay un registro de cultivos viables financieramente para "
+            "el perfil climatológico exacto de esta entidad.", estilo_cuerpo
+        ))
 
-    elements.append(Paragraph("<br/><br/><i>Fuentes: SIAP, CONAGUA, FIRA. Análisis generado por Agrovita URNC.</i>", styles["Italic"]))
-    doc.build(elements)
-    buf.seek(0)
-    return buf
+    historia.append(Spacer(1, 10))
+
+    historia.append(Paragraph("Parámetros Climatológicos (Promedio Anual)", estilo_seccion))
+    historia.append(Paragraph(
+        f"Precipitación: <b>{estado_data['precipitacion_anual_mm']:.0f} mm</b> &nbsp;·&nbsp; "
+        f"Temp. Media: <b>{estado_data['temp_media_anual_c']:.1f} °C</b> &nbsp;·&nbsp; "
+        f"Máxima: <b>{estado_data['temp_maxima_anual_c']:.1f} °C</b> &nbsp;·&nbsp; "
+        f"Mínima: <b>{estado_data['temp_minima_anual_c']:.1f} °C</b>",
+        estilo_cuerpo
+    ))
+
+    historia.append(Paragraph(
+        "Fuentes: SIAP 2025-2026 · SIACON 2024 · CONAGUA 2025 · FIRA/SAGARPA (costos de referencia)  "
+        "Universidad Rosario Castellanos — LCDN · Equipo 4 · 2026  "
+        "Los valores de ganancia son estimaciones basadas en precios promedio de mercado.",
+        estilo_nota
+    ))
+
+    doc.build(historia)
+    buffer.seek(0)
+    return buffer
 
 st.divider()
-if st.download_button("Exportar Dictamen Técnico (PDF)", 
-                      data=generate_corporate_pdf(estado_sel, perfil, mejor_opcion, utilidad, vol_vs_maiz, df_rank if cultivos_viables else pd.DataFrame()), 
-                      file_name=f"Dictamen_{estado_sel}.pdf", mime="application/pdf"):
-    st.success("Reporte generado exitosamente.")
 
-st.markdown('<div style="text-align:center; font-size:10px; color:#546E7A; padding-top:20px">URNC · Licenciatura en Ciencia de Datos para Negocios · 2026</div>', unsafe_allow_html=True)
+col_btn, _ = st.columns([1, 3])
+with col_btn:
+    df_rec_pdf = df_rec.dropna(subset=["Ganancia/ha"]) if not df_rec.empty else df_rec
+    
+    pdf_buffer = generar_reporte_pdf(
+        estado_sel, perfil, mejor_cultivo, mejor_margen,
+        veces_maiz, maiz_margen, df_rec_pdf
+    )
+    st.download_button(
+        label="Descargar resumen en PDF",
+        data=pdf_buffer,
+        file_name=f"recomendacion_{estado_sel.lower().replace(' ', '_')}.pdf",
+        mime="application/pdf",
+        use_container_width=True
+    )
+
+st.markdown("""
+<div class="dash-footer">
+  Fuentes: SIAP 2025-2026 · SIACON 2024 · CONAGUA 2025 · FIRA/SAGARPA (costos de referencia) &nbsp;·&nbsp;
+  Universidad Rosario Castellanos — LCDN · Equipo 4 · 2026
+</div>
+""", unsafe_allow_html=True)
