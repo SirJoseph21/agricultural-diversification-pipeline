@@ -52,6 +52,13 @@ st.markdown("""
         gap: 12px;
         margin-bottom: 14px;
     }
+
+    [data-testid="stDataFrame"] {
+        overflow-x: auto !important;
+    }
+    [data-testid="stDataFrame"] > div {
+        min-width: 580px;
+    }
     
     .kpi-card {
         background: #112233;
@@ -272,7 +279,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-col_tabla, col_graficas = st.columns([1, 2.5])
+col_tabla, col_graficas = st.columns([1.4, 2.6])
 df_rec = pd.DataFrame() 
 
 with col_tabla:
@@ -299,9 +306,22 @@ with col_tabla:
             
             df_rec.insert(0, "Top", range(1, len(df_rec) + 1))
             df_rec["Top"] = df_rec["Top"].apply(lambda x: f"#{x}")
-            df_rec.columns = ["Top", "Cultivo", "Producción (t/ha)", "Inversión/ha", "Ganancia/ha", "Vol. vs Maíz"]
+            df_rec.columns = ["#", "Cultivo", "t/ha", "Inv/ha", "Gan/ha", "vs Maíz"]
             
-            st.dataframe(df_rec, use_container_width=True, height=230, hide_index=True)
+            st.dataframe(
+                df_rec,
+                width="stretch",
+                height=230,
+                hide_index=True,
+                column_config={
+                    "#": st.column_config.TextColumn(width="small"),
+                    "Cultivo": st.column_config.TextColumn(width="medium"),
+                    "t/ha": st.column_config.TextColumn(width="small"),
+                    "Inv/ha": st.column_config.TextColumn(width="small"),
+                    "Gan/ha": st.column_config.TextColumn(width="small"),
+                    "vs Maíz": st.column_config.TextColumn(width="small"),
+                }
+            )
         else:
             st.warning("No hay datos financieros registrados para este perfil climático.")
     else:
@@ -323,7 +343,7 @@ with col_tabla:
             f"{df_clima['temp_minima_anual_c'].mean():.1f} °C",
         ]
     })
-    st.dataframe(df_clima_tabla, use_container_width=True, height=180, hide_index=True)
+    st.dataframe(df_clima_tabla, width="stretch", height=180, hide_index=True)
 
 with col_graficas:
     tab1, tab2, tab3 = st.tabs([
@@ -477,12 +497,12 @@ def generar_reporte_pdf(estado, perfil, mejor_cultivo, mejor_margen, veces_maiz,
         tabla_datos = [["Top", "Cultivo", "Prod. (t/ha)", "Inv./ha", "Ganancia/ha", "vs Maíz"]]
         for _, row in df_rec.iterrows():
             tabla_datos.append([
-                row["Top"],
+                row["#"],
                 row["Cultivo"],
-                str(row["Producción (t/ha)"]),
-                row["Inversión/ha"],
-                row["Ganancia/ha"],
-                row["Vol. vs Maíz"]
+                str(row["t/ha"]),
+                row["Inv/ha"],
+                row["Gan/ha"],
+                row["vs Maíz"]
             ])
 
         tabla = Table(tabla_datos, colWidths=[0.5*inch, 1.8*inch, 1.1*inch, 1.2*inch, 1.3*inch, 1.0*inch])
@@ -533,7 +553,7 @@ st.divider()
 
 col_btn, _ = st.columns([1, 3])
 with col_btn:
-    df_rec_pdf = df_rec.dropna(subset=["Ganancia/ha"]) if not df_rec.empty else df_rec
+    df_rec_pdf = df_rec.dropna(subset=["Gan/ha"]) if not df_rec.empty else df_rec
     
     pdf_buffer = generar_reporte_pdf(
         estado_sel, perfil, mejor_cultivo, mejor_margen,
@@ -544,7 +564,7 @@ with col_btn:
         data=pdf_buffer,
         file_name=f"recomendacion_{estado_sel.lower().replace(' ', '_')}.pdf",
         mime="application/pdf",
-        use_container_width=True
+        width="stretch"
     )
 
 st.markdown("""
