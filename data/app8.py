@@ -9,14 +9,14 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 from reportlab.lib.units import inch
 
-# ── Configuración ─────────────────────────────────────────────
+# ── Configuración inicial ──────────────────────────────────────
 st.set_page_config(
     page_title="Diversificación Agrícola · México",
     page_icon="🌱",
     layout="wide"
 )
 
-# ── CSS global — aspecto dashboard ───────────────────────────
+# ── CSS global — aspecto dashboard (CON OPTIMIZACIÓN ANDROID) ──
 st.markdown("""
 <style>
     .stApp { background-color: #0D1B2A; color: #E0E0E0; }
@@ -48,12 +48,14 @@ st.markdown("""
         margin-bottom: 4px;
     }
 
+    /* ── MAGIA ANDROID: auto-fit para que no se aplasten en móvil ── */
     .kpi-row {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
         gap: 12px;
         margin-bottom: 14px;
     }
+    
     .kpi-card {
         background: #112233;
         border: 1px solid #1E3A5F;
@@ -211,7 +213,7 @@ st.markdown("""
     <div class="dash-title">¿Qué puedo sembrar en mi estado?</div>
     <div class="dash-subtitle">Cultivos alternativos al maíz con mayor ganancia · SIAP / CONAGUA / SIACON 2024-2026</div>
   </div>
-  <div class="dash-subtitle">LCDN · Equipo 4 · 2026</div>
+  <div class="dash-subtitle">Universidad Rosario Castellanos — LCDN · Equipo 4 · 2026</div>
 </div>
 """, unsafe_allow_html=True)
 
