@@ -9,14 +9,12 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 from reportlab.lib.units import inch
 
-# ── Configuración inicial ──────────────────────────────────────
 st.set_page_config(
     page_title="Diversificación Agrícola · México",
     page_icon="🌱",
     layout="wide"
 )
 
-# ── CSS global — aspecto dashboard (CON OPTIMIZACIÓN ANDROID) ──
 st.markdown("""
 <style>
     .stApp { background-color: #0D1B2A; color: #E0E0E0; }
@@ -48,7 +46,6 @@ st.markdown("""
         margin-bottom: 4px;
     }
 
-    /* ── MAGIA ANDROID: auto-fit para que no se aplasten en móvil ── */
     .kpi-row {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -133,7 +130,6 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# ── Datos financieros ─────────────────────────────────────────
 datos_financieros = {
     "Tomate rojo (jitomate)": {"precio_ton": 10062.31, "costo_ha": 120000, "rendimiento": 74.79},
     "Fresa":                  {"precio_ton": 24706.56, "costo_ha": 85000,  "rendimiento": 43.90},
@@ -172,7 +168,6 @@ PLOT_LAYOUT = dict(
     legend=dict(bgcolor="#0D1B2A", bordercolor="#1E3A5F", borderwidth=1, font_size=10),
 )
 
-# ── Cargar datos ──────────────────────────────────────────────
 @st.cache_data
 def cargar_datos():
     df_cultivos = pd.read_csv("data/processed/cultivos_2025.csv")
@@ -204,9 +199,6 @@ def cargar_datos():
 
 df_agro, df_clima = cargar_datos()
 
-# ════════════════════════════════════════════════════════════
-# HEADER
-# ════════════════════════════════════════════════════════════
 st.markdown("""
 <div class="dash-header">
   <div>
@@ -217,9 +209,6 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# ════════════════════════════════════════════════════════════
-# FILTRO HORIZONTAL
-# ════════════════════════════════════════════════════════════
 col_f1, col_f2 = st.columns([1, 4])
 with col_f1:
     st.markdown('<div class="filter-label">Selecciona tu estado</div>', unsafe_allow_html=True)
@@ -227,9 +216,6 @@ with col_f1:
         "", sorted(df_clima["estado"].tolist()), label_visibility="collapsed"
     )
 
-# ════════════════════════════════════════════════════════════
-# DATOS DEL ESTADO
-# ════════════════════════════════════════════════════════════
 estado_data  = df_clima[df_clima["estado"] == estado_sel].iloc[0]
 perfil       = estado_data["perfil_climatico"]
 cultivos_rec = compatibilidad.get(perfil, [])
@@ -253,9 +239,6 @@ else:
     mejor_cultivo = "N/D"
     mejor_rend = mejor_margen = veces_maiz = 0
 
-# ════════════════════════════════════════════════════════════
-# KPI ROW — 4 indicadores clave
-# ════════════════════════════════════════════════════════════
 st.markdown(f"""
 <div class="kpi-row">
   <div class="kpi-card">
@@ -281,9 +264,6 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# ════════════════════════════════════════════════════════════
-# BANNER DE RECOMENDACIÓN
-# ════════════════════════════════════════════════════════════
 st.markdown(f"""
 <div class="rec-banner">
   Para <strong>{estado_sel}</strong> recomendamos cambiar a <strong>{mejor_cultivo}</strong> —
@@ -292,12 +272,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# ════════════════════════════════════════════════════════════
-# LAYOUT PRINCIPAL — tabla izquierda / gráficas derecha
-# ════════════════════════════════════════════════════════════
 col_tabla, col_graficas = st.columns([1, 2.5])
-
-# Inicializamos df_rec vacío por seguridad
 df_rec = pd.DataFrame() 
 
 with col_tabla:
@@ -315,33 +290,23 @@ with col_tabla:
         )
         
         df_rec["vs_maiz"] = (df_rec["rendimiento"] / maiz_rend).round(1).astype(str) + "x"
-        
-        # ── LA MAGIA DE LA LIMPIEZA: Eliminamos cultivos sin datos financieros ──
         df_rec = df_rec.dropna(subset=["ganancia_ha"])
         
         if not df_rec.empty:
-            # 1. Ordenamos por ganancia (el que más gana va arriba)
             df_rec = df_rec.sort_values("ganancia_ha", ascending=False).reset_index(drop=True)
-            
-            # 2. Formateo de moneda
             df_rec["costo_ha"] = df_rec["costo_ha"].apply(lambda x: f"${x:,.0f}" if pd.notna(x) else "N/D")
             df_rec["ganancia_ha"] = df_rec["ganancia_ha"].apply(lambda x: f"${x:,.0f}" if pd.notna(x) else "N/D")
             
-            # 3. Magia del Ranking
             df_rec.insert(0, "Top", range(1, len(df_rec) + 1))
             df_rec["Top"] = df_rec["Top"].apply(lambda x: f"#{x}")
-            
-            # 4. Renombramos columnas
             df_rec.columns = ["Top", "Cultivo", "Producción (t/ha)", "Inversión/ha", "Ganancia/ha", "Vol. vs Maíz"]
             
-            # 5. Imprimimos ocultando el índice del sistema
             st.dataframe(df_rec, use_container_width=True, height=230, hide_index=True)
         else:
             st.warning("No hay datos financieros registrados para este perfil climático.")
     else:
         st.warning("No hay datos financieros registrados para este perfil climático.")
 
-    # ── Tabla de clima ──
     st.markdown('<div class="section-label" style="margin-top:12px">Clima de tu estado</div>', unsafe_allow_html=True)
     df_clima_tabla = pd.DataFrame({
         "Indicador": ["Lluvia anual", "Temp. media", "Temp. máxima", "Temp. mínima"],
@@ -442,9 +407,6 @@ with col_graficas:
         fig3.update_layout(**PLOT_LAYOUT)
         st.plotly_chart(fig3, use_container_width=True)
 
-# ════════════════════════════════════════════════════════════
-# BOTÓN DE DESCARGA — REPORTE PDF
-# ════════════════════════════════════════════════════════════
 def generar_reporte_pdf(estado, perfil, mejor_cultivo, mejor_margen, veces_maiz, maiz_margen, df_rec):
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=letter,
@@ -452,20 +414,26 @@ def generar_reporte_pdf(estado, perfil, mejor_cultivo, mejor_margen, veces_maiz,
                             topMargin=0.8*inch, bottomMargin=0.8*inch)
     styles = getSampleStyleSheet()
 
+    color_primario = colors.HexColor("#0A2540")   
+    color_secundario = colors.HexColor("#1976D2") 
+    color_gris = colors.HexColor("#546E7A")       
+    color_fondo_fila = colors.HexColor("#F0F4F8") 
+    color_borde = colors.HexColor("#CFD8DC")      
+
     estilo_titulo = ParagraphStyle("titulo", parent=styles["Title"],
-                                   fontSize=18, textColor=colors.HexColor("#1B5E20"),
+                                   fontSize=18, textColor=color_primario,
                                    spaceAfter=4)
     estilo_subtitulo = ParagraphStyle("subtitulo", parent=styles["Normal"],
-                                      fontSize=10, textColor=colors.HexColor("#546E7A"),
+                                      fontSize=10, textColor=color_gris,
                                       spaceAfter=16)
     estilo_seccion = ParagraphStyle("seccion", parent=styles["Heading2"],
-                                    fontSize=12, textColor=colors.HexColor("#1B5E20"),
+                                    fontSize=12, textColor=color_secundario,
                                     spaceBefore=14, spaceAfter=6,
                                     borderPad=4)
     estilo_cuerpo = ParagraphStyle("cuerpo", parent=styles["Normal"],
                                    fontSize=11, leading=16, spaceAfter=6)
     estilo_destacado = ParagraphStyle("destacado", parent=styles["Normal"],
-                                      fontSize=13, textColor=colors.HexColor("#1B5E20"),
+                                      fontSize=13, textColor=color_primario,
                                       fontName="Helvetica-Bold", spaceAfter=8)
     estilo_nota = ParagraphStyle("nota", parent=styles["Normal"],
                                  fontSize=8, textColor=colors.HexColor("#888888"),
@@ -473,39 +441,35 @@ def generar_reporte_pdf(estado, perfil, mejor_cultivo, mejor_margen, veces_maiz,
 
     historia = []
 
-    historia.append(Paragraph("Recomendación de Cultivos", estilo_titulo))
-    historia.append(Paragraph(f"Diversificación Agrícola · {estado} · 2026", estilo_subtitulo))
+    historia.append(Paragraph("Reporte de Inteligencia Agrícola", estilo_titulo))
+    historia.append(Paragraph(f"Análisis de Diversificación · {estado} · 2026", estilo_subtitulo))
 
-    # Separador
     historia.append(Table([[""]], colWidths=[6.4*inch],
-                           style=[("LINEBELOW", (0,0), (-1,-1), 1, colors.HexColor("#1B5E20"))]))
+                           style=[("LINEBELOW", (0,0), (-1,-1), 1.5, color_secundario)]))
     historia.append(Spacer(1, 12))
 
-    # Bloque principal
-    historia.append(Paragraph("Resumen para el productor", estilo_seccion))
+    historia.append(Paragraph("Resumen Ejecutivo para el Productor", estilo_seccion))
     historia.append(Paragraph(
-        f"Su estado <b>{estado}</b> tiene un clima de tipo <b>{perfil}</b>. "
-        f"Con base en ese clima, el cultivo que más ganancia le puede dejar es:",
+        f"La entidad federativa de <b>{estado}</b> presenta un perfil climatológico <b>{perfil}</b>. "
+        f"De acuerdo con nuestro modelo financiero, el cultivo más rentable es:",
         estilo_cuerpo
     ))
     historia.append(Paragraph(f"→ {mejor_cultivo}", estilo_destacado))
     historia.append(Paragraph(
-        f"Sembrando <b>{mejor_cultivo}</b> puede ganar aproximadamente "
-        f"<b>${mejor_margen:,.0f} pesos libres por hectárea</b>, "
-        f"con un volumen de producción <b>{veces_maiz:.1f} veces mayor</b> al del maíz "
+        f"La transición hacia <b>{mejor_cultivo}</b> proyecta una utilidad de "
+        f"<b>${mejor_margen:,.0f} MXN libres por hectárea</b>. Esto representa "
+        f"un volumen de producción <b>{veces_maiz:.1f} veces mayor</b> en contraste con el maíz tradicional "
         f"(${maiz_margen:,.0f}/ha).",
         estilo_cuerpo
     ))
 
     historia.append(Spacer(1, 10))
 
-    # Tabla de cultivos
-    historia.append(Paragraph("Cultivos recomendados para su estado", estilo_seccion))
+    historia.append(Paragraph("Ranking de Rentabilidad y Capital", estilo_seccion))
     
     if not df_rec.empty:
         historia.append(Paragraph(
-            "En la siguiente tabla se muestran todos los cultivos que funcionan bien "
-            "en su tipo de clima, priorizados por rentabilidad y requerimiento de capital:",
+            "Alternativas agrícolas viables para la región, ordenadas por margen de ganancia:",
             estilo_cuerpo
         ))
         historia.append(Spacer(1, 6))
@@ -523,14 +487,14 @@ def generar_reporte_pdf(estado, perfil, mejor_cultivo, mejor_margen, veces_maiz,
 
         tabla = Table(tabla_datos, colWidths=[0.5*inch, 1.8*inch, 1.1*inch, 1.2*inch, 1.3*inch, 1.0*inch])
         tabla.setStyle(TableStyle([
-            ("BACKGROUND",  (0, 0), (-1, 0),  colors.HexColor("#1B5E20")),
+            ("BACKGROUND",  (0, 0), (-1, 0),  color_primario),
             ("TEXTCOLOR",   (0, 0), (-1, 0),  colors.white),
             ("FONTNAME",    (0, 0), (-1, 0),  "Helvetica-Bold"),
             ("FONTSIZE",    (0, 0), (-1, 0),  10),
             ("FONTSIZE",    (0, 1), (-1, -1), 10),
-            ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.HexColor("#F1F8E9"), colors.white]),
-            ("GRID",        (0, 0), (-1, -1), 0.5, colors.HexColor("#C8E6C9")),
-            ("ALIGN",       (2, 0), (-1, -1), "CENTER"), # Alinear números al centro
+            ("ROWBACKGROUNDS", (0, 1), (-1, -1), [color_fondo_fila, colors.white]),
+            ("GRID",        (0, 0), (-1, -1), 0.5, color_borde),
+            ("ALIGN",       (2, 0), (-1, -1), "CENTER"), 
             ("VALIGN",      (0, 0), (-1, -1), "MIDDLE"),
             ("ROWHEIGHT",   (0, 0), (-1, -1), 22),
             ("TOPPADDING",  (0, 0), (-1, -1), 5),
@@ -545,17 +509,15 @@ def generar_reporte_pdf(estado, perfil, mejor_cultivo, mejor_margen, veces_maiz,
 
     historia.append(Spacer(1, 10))
 
-    # Clima
-    historia.append(Paragraph("Condiciones climáticas de su estado", estilo_seccion))
+    historia.append(Paragraph("Parámetros Climatológicos (Promedio Anual)", estilo_seccion))
     historia.append(Paragraph(
-        f"Lluvia anual: <b>{estado_data['precipitacion_anual_mm']:.0f} mm</b> &nbsp;·&nbsp; "
-        f"Temperatura media: <b>{estado_data['temp_media_anual_c']:.1f} °C</b> &nbsp;·&nbsp; "
+        f"Precipitación: <b>{estado_data['precipitacion_anual_mm']:.0f} mm</b> &nbsp;·&nbsp; "
+        f"Temp. Media: <b>{estado_data['temp_media_anual_c']:.1f} °C</b> &nbsp;·&nbsp; "
         f"Máxima: <b>{estado_data['temp_maxima_anual_c']:.1f} °C</b> &nbsp;·&nbsp; "
         f"Mínima: <b>{estado_data['temp_minima_anual_c']:.1f} °C</b>",
         estilo_cuerpo
     ))
 
-    # Nota al pie
     historia.append(Paragraph(
         "Fuentes: SIAP 2025-2026 · SIACON 2024 · CONAGUA 2025 · FIRA/SAGARPA (costos de referencia)  "
         "Universidad Rosario Castellanos — LCDN · Equipo 4 · 2026  "
@@ -571,7 +533,6 @@ st.divider()
 
 col_btn, _ = st.columns([1, 3])
 with col_btn:
-    # Aseguramos que al exportar a PDF, tampoco haya nulos estorbando
     df_rec_pdf = df_rec.dropna(subset=["Ganancia/ha"]) if not df_rec.empty else df_rec
     
     pdf_buffer = generar_reporte_pdf(
@@ -586,9 +547,6 @@ with col_btn:
         use_container_width=True
     )
 
-# ════════════════════════════════════════════════════════════
-# FOOTER
-# ════════════════════════════════════════════════════════════
 st.markdown("""
 <div class="dash-footer">
   Fuentes: SIAP 2025-2026 · SIACON 2024 · CONAGUA 2025 · FIRA/SAGARPA (costos de referencia) &nbsp;·&nbsp;
